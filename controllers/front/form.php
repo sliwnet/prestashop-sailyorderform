@@ -5,47 +5,47 @@ class SailyOrderFormFormModuleFrontController extends ModuleFrontController
     {
         parent::initContent();
 
-        if (!Tools::getValue('ref') || !is_numeric(Tools::getValue('ref'))) {
+        if (!Tools::getValue('ref')) {
             die('Nieprawidłowe zamówienie');
         }
 
-        $id_order = (int)Tools::getValue('ref');
+        $reference = pSQL(Tools::getValue('ref'));
+        $id_order = Db::getInstance()->getValue('SELECT id_order FROM ' . _DB_PREFIX_ . 'orders WHERE reference = "' . $reference . '"');
+        
+        if (!$id_order) {
+            die('Zamówienie nie istnieje');
+        }
+
         $order = new Order($id_order);
         $customer = new Customer($order->id_customer);
         $address = new Address($order->id_address_invoice);
+        $quantity = Db::getInstance()->getValue('SELECT product_quantity FROM ' . _DB_PREFIX_ . 'order_detail WHERE id_order = ' . (int)$id_order);
+        
+        if (Tools::isSubmit('submit_form')) {
+            foreach (Tools::getValue('participants') as $participant) {
+                Db::getInstance()->insert('saily_order_data', [
+                    'id_order' => $id_order,
+                    'first_name' => pSQL($participant['first_name']),
+                    'last_name' => pSQL($participant['last_name']),
+                    'email' => pSQL($participant['email']),
+                    'phone' => pSQL($participant['phone']),
+                    'birth_date' => pSQL($participant['birth_date']),
+                    'birth_place' => pSQL($participant['birth_place']),
+                    'street' => pSQL($participant['street']),
+                    'house_number' => pSQL($participant['house_number']),
+                    'postal_code' => pSQL($participant['postal_code']),
+                    'city' => pSQL($participant['city']),
+                    'can_swim' => isset($participant['can_swim']) ? 1 : 0,
+                    'data_agreement' => isset(Tools::getValue('data_agreement')) ? 1 : 0,
+                ]);
+            }
+            Tools::redirect($this->context->link->getModuleLink('sailyorderform', 'form', ['ref' => $reference, 'success' => 1]));
+        }
 
         $this->context->smarty->assign([
-            'first_name' => $customer->firstname,
-            'last_name' => $customer->lastname,
-            'email' => $customer->email,
-            'phone' => $address->phone,
-            'birth_date' => '',
-            'birth_place' => '',
-            'street' => $address->address1,
-            'house_number' => '',
-            'postal_code' => $address->postcode,
-            'city' => $address->city,
-            'id_order' => $id_order
+            'id_order' => $id_order,
+            'participants' => []
         ]);
-
-        if (Tools::isSubmit('submit_form')) {
-            Db::getInstance()->insert('saily_order_data', [
-                'id_order' => $id_order,
-                'first_name' => pSQL(Tools::getValue('first_name')),
-                'last_name' => pSQL(Tools::getValue('last_name')),
-                'email' => pSQL(Tools::getValue('email')),
-                'phone' => pSQL(Tools::getValue('phone')),
-                'birth_date' => pSQL(Tools::getValue('birth_date')),
-                'birth_place' => pSQL(Tools::getValue('birth_place')),
-                'street' => pSQL(Tools::getValue('street')),
-                'house_number' => pSQL(Tools::getValue('house_number')),
-                'postal_code' => pSQL(Tools::getValue('postal_code')),
-                'city' => pSQL(Tools::getValue('city')),
-                'can_swim' => (int)Tools::getValue('can_swim', 0),
-                'data_agreement' => (int)Tools::getValue('data_agreement', 0)
-            ]);
-            Tools::redirect($this->context->link->getModuleLink('sailyorderform', 'form', ['ref' => $id_order, 'success' => 1]));
-        }
 
         $this->setTemplate('module:sailyorderform/views/templates/front/form.tpl');
     }

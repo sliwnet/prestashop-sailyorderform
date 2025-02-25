@@ -3,13 +3,17 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+// ============================== //
+//   GŁÓWNY PLIK MODUŁU           //
+// ============================== //
+
 class SailyOrderForm extends Module
 {
     public function __construct()
     {
         $this->name = 'sailyorderform';
         $this->tab = 'administration';
-        $this->version = '1.0.0';
+        $this->version = '1.1.1';
         $this->author = 'Saily.pl';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -22,7 +26,7 @@ class SailyOrderForm extends Module
 
     public function install()
     {
-        return parent::install() && $this->registerHook('displayOrderConfirmation') && $this->installDatabase() && $this->installEmailTemplates();
+        return parent::install() && $this->registerHook('displayOrderConfirmation') && $this->installDatabase() && $this->installEmailTemplates() && $this->registerFrontController();
     }
 
     public function uninstall()
@@ -69,29 +73,13 @@ class SailyOrderForm extends Module
         return true;
     }
 
+    private function registerFrontController()
+    {
+        return Db::getInstance()->execute("INSERT INTO " . _DB_PREFIX_ . "module_front_controller (id_module, controller) VALUES ('" . (int)$this->id . "', 'form')");
+    }
+
     public function getContent()
     {
         return '<h2>' . $this->displayName . '</h2><p>Moduł do zbierania dodatkowych danych zamówień kursów.</p>';
-    }
-
-    public function sendConfirmationEmail($email, $firstName)
-    {
-        $templateVars = [
-            '{first_name}' => $firstName,
-        ];
-        
-        return Mail::Send(
-            (int)Configuration::get('PS_LANG_DEFAULT'),
-            'saily_order_confirmation',
-            $this->l('Dziękujemy za uzupełnienie danych'),
-            $templateVars,
-            $email,
-            null,
-            Configuration::get('PS_SHOP_EMAIL'),
-            Configuration::get('PS_SHOP_NAME'),
-            null,
-            null,
-            _PS_MODULE_DIR_ . $this->name . '/mails/'
-        );
     }
 }
