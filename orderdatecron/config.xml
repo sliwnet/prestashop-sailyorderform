@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>orderdatecron</name>
+    <displayName>Order Date Cron</displayName>
+    <version>1.0.0</version>
+    <author>Custom Dev</author>
+    <description>Extracts date from product name and saves it in order details.</description>
+    <tab>administration</tab>
+    <is_configurable>0</is_configurable>
+</module>

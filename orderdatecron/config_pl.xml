@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>orderdatecron</name>
+    <displayName><![CDATA[Order Date Cron]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[Extracts date from product name and saves it in order details.]]></description>
+    <author><![CDATA[Custom Dev]]></author>
+    <tab><![CDATA[administration]]></tab>
+    <is_configurable>0</is_configurable>
+    <need_instance>0</need_instance>
+	<limited_countries></limited_countries>
+</module>
